@@ -1,23 +1,29 @@
 package utilities;
 
+import common.CommonClass;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-public class PropertyFileUtil {
+public class PropertyFileUtil extends CommonClass {
     public Properties prop;
 
-    public Properties initProperties() {
-        prop = new Properties();
+    private static Properties configFile;
+
+    static {
         try {
             FileInputStream fileInputStream = new FileInputStream("config.properties");
-            prop.load(fileInputStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            configFile = new Properties();
+            configFile.load(fileInputStream);
+            fileInputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("An Exception has occurred " + e);
         }
-        return prop;
+    }
+
+    public static String getProperty(String key) {
+        return configFile.getProperty(key);
     }
 }

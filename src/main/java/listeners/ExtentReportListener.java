@@ -49,11 +49,11 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
     }
 
     public synchronized void onStart(ITestContext context) {
-        System.out.println("Test Suite started!");
+        logger.info("Test Suite started!");
     }
 
     public synchronized void onFinish(ITestContext context) {
-        System.out.println(("Test Suite is ending!"));
+        logger.info(("Test Suite is ending!"));
         extent.flush();
         test.remove();
     }
@@ -65,7 +65,7 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
         int mid = qualifiedName.substring(0, last).lastIndexOf(".");
         String className = qualifiedName.substring(mid + 1, last);
 
-        System.out.println(methodName + " started!");
+        logger.info(methodName + " started!");
         ExtentTest extentTest = extent.createTest(result.getMethod().getMethodName(),
                 result.getMethod().getDescription());
 
@@ -80,13 +80,13 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
     }
 
     public synchronized void onTestSuccess(ITestResult result) {
-        System.out.println((result.getMethod().getMethodName() + " passed!"));
+        logger.info((result.getMethod().getMethodName() + " passed!"));
         test.get().pass("Test passed");
         test.get().getModel().setEndTime(getTime(result.getEndMillis()));
     }
 
     public synchronized void onTestFailure(ITestResult result) {
-        System.out.println((result.getMethod().getMethodName() + " failed!"));
+        logger.info((result.getMethod().getMethodName() + " failed!"));
         test.get().fail(result.getThrowable(),
                 MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
         test.get().getModel().setEndTime(getTime(result.getEndMillis()));
@@ -94,7 +94,7 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
 
     @Override
     public synchronized void onTestSkipped(ITestResult result) {
-		/*System.out.println((result.getMethod().getMethodName() + " skipped!"));
+		/*logger.info((result.getMethod().getMethodName() + " skipped!"));
 		try {
 			test.get().skip(result.getThrowable(),
 					MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
@@ -107,7 +107,7 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
 
     @Override
     public synchronized void onTestFailedButWithinSuccessPercentage(ITestResult result) {
-        System.out.println(("onTestFailedButWithinSuccessPercentage for " + result.getMethod().getMethodName()));
+        logger.info(("onTestFailedButWithinSuccessPercentage for " + result.getMethod().getMethodName()));
     }
 
     private Date getTime(long millis) {

@@ -1,5 +1,6 @@
 package Base;
 
+import common.CommonClass;
 import org.openqa.selenium.WebDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -7,12 +8,10 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 
-public class BrowserFactory {
+public class BrowserFactory extends CommonClass {
 
-    public static WebDriver driver;
-
-    public WebDriver initBrowser(String browser) {
-        switch (browser.toLowerCase()) {
+    public WebDriver initBrowser(String browserType) {
+        switch (browserType.toLowerCase()) {
             case "chrome":
                 WebDriverManager.chromedriver().setup();
                 driver = new ChromeDriver();
@@ -30,11 +29,19 @@ public class BrowserFactory {
                 driver = new EdgeDriver();
                 break;
             default:
+                logger.error("Failed to Launch" + browserType);
         }
         return driver;
     }
 
     public void quitDriver() {
-        driver.quit();
+        try {
+            if (driver != null) {
+                driver.quit();
+            }
+            logger.info("Driver Closed !!");
+        } catch (Exception e) {
+            logger.error("Exception Occurred :" + e.getMessage());
+        }
     }
 }
