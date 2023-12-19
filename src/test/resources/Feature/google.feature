@@ -1,14 +1,28 @@
 Feature: Test Google Feature File
 
-  Background:
+  @Test001
+  Scenario Outline: Invalid City Weather Scenario
+  Verify weather should not be found if user searches with an invalid city name
 
-  @Test01
-  Scenario Outline: Test Google
-    When  User launch https://app.hubspot.com/login on <browser>
-    And User close browser
+    Given User launches OpenWeatherMap website in desired <Browser>
+
 
     Examples:
-      | browser |
-      | chrome  |
-      | firefox |
-      | Edge    |
+      | Browser |
+      | Chrome  |
+      | Firefox |
+
+@Test002
+  Scenario Outline: Valid City Weather Scenario
+  Verify weather details should be displayed if user searches with a valid city name
+
+    Given User launches OpenWeatherMap website in desired <Browser>
+    When User provides a input as city
+    And User clicks on search button
+    Then Proper city details should be found
+    And Weather details should be updated
+
+    Examples:
+      | Browser |
+      | Chrome  |
+      | Firefox |

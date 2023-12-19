@@ -1,0 +1,11 @@
+{
+  "ValidCityWeatherScenario": {
+    "city": "London, GB"
+  },
+  "inValidCityWeatherScenario": {
+    "city": "Landon, CB"
+  },
+  "ValidCityWeatherScenario": {
+    "city": ""
+  }
+}

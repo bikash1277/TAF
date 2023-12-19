@@ -1,6 +1,6 @@
 package common;
 
-import org.apache.log4j.LogManager;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class CommonClass {
-    public static final Logger logger = LogManager.getLogger(CommonClass.class);
+    public final Logger logger = Logger.getLogger(getClass().getSimpleName());
     public final static String TESTDATA_SHEET_PATH = "src/test/resources/data/excel/testdata.xlsx";
     public static int lngPageLoadTimeOut = 60;
     public static int lngElementDetectionTimeOut = 30;

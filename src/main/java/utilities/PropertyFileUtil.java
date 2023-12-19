@@ -1,18 +1,17 @@
 package utilities;
 
-import common.CommonClass;
+import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-public class PropertyFileUtil extends CommonClass {
+public class PropertyFileUtil {
     public Properties prop;
-
+    public final Logger logger = Logger.getLogger(getClass().getSimpleName());
     private static Properties configFile;
 
-    static {
+    public PropertyFileUtil() {
         try {
             FileInputStream fileInputStream = new FileInputStream("config.properties");
             configFile = new Properties();

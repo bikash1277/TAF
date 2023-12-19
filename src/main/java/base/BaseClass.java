@@ -1,36 +1,39 @@
-package Base;
+package base;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
+import utilities.JsonUtil;
+import utilities.PropertyFileUtil;
 
+
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class BaseClass extends BrowserFactory {
+    public WaitClass waitClass;
+    public PropertyFileUtil propertyFileUtil;
+    public JsonUtil jsonUtil;
+    public VerifyClass verifyClass;
+    public String suiteName;
+
     public BaseClass() {
         super();
-    }
-
-    private String getBrowserType(String browserType) {
-        browserType = browserType.toLowerCase().trim();
-        if (browserType.equals("ff") || browserType.equals("firefox") || browserType.equals("mozilla") || browserType.equals("")) {
-            return "firefox";
-        } else if (browserType.equals("ie") || browserType.equals("explorer") || browserType.equals("internet explorer")) {
-            return "ie";
-        } else if (browserType.equals("chrome") || browserType.equals("google") || browserType.equals("google chrome")) {
-            return "chrome";
-        } else if (browserType.equals("edge") || browserType.equals("ee") || browserType.equals("microsoft edge")) {
-            return "edge";
-        } else {
-            return null;
-        }
+        waitClass = new WaitClass();
+        verifyClass = new VerifyClass();
+        propertyFileUtil = new PropertyFileUtil();
+        jsonUtil = new JsonUtil();
     }
 
     public WebDriver getDriver(String browserType) {
         try {
-            driver = initBrowser(getBrowserType(browserType));
+            driver = initBrowser(browserType);
             logger.info(browserType + "Driver Launched !!");
             return driver;
         } catch (Exception e) {
@@ -50,7 +53,7 @@ public class BaseClass extends BrowserFactory {
         }
     }
 
-    public static WebElement getLocator(String element, String locatorType) {
+    public WebElement getLocator(String element, String locatorType) {
         WebElement webElement = null;
         try {
             if (element.isEmpty()) {
@@ -101,6 +104,28 @@ public class BaseClass extends BrowserFactory {
         }
     }
 
+    public void fillData(WebElement element, String data) {
+        try {
+            element.click();
+            element.clear();
+            element.sendKeys(data);
+            logger.info("Entered text " + data + " successfully !!!!");
+        } catch (ElementNotInteractableException e) {
+            logger.error("Exception Occurred :" + e.getMessage());
+        }
+    }
+
+    public void handleAlert(boolean action) {
+        Alert alert = driver.switchTo().alert();
+        if (action) {
+            alert.accept();
+            logger.info("Alert Accepted ");
+        } else {
+            alert.dismiss();
+            logger.info("Alert rejected");
+        }
+    }
+
     public String getText(WebElement element) {
         try {
             String text;
@@ -121,6 +146,11 @@ public class BaseClass extends BrowserFactory {
         } catch (Exception e) {
             logger.error("Exception Occurred :" + e.getMessage());
         }
+    }
+
+    public void clickElementUsingJavaScript(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].click();", element);
     }
 
     public void selectItemFromListBox(WebElement element, String key, String value) {
@@ -163,6 +193,11 @@ public class BaseClass extends BrowserFactory {
         javascriptExecutor.executeScript(command);
     }
 
+    public void scrollToViewWebElement(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].scrollIntoView();", element);
+    }
+
     public void iterateElementsAndClick(By element) {
         List<WebElement> resultList = driver.findElements(element);
         for (WebElement eachResult : resultList) {
@@ -171,10 +206,11 @@ public class BaseClass extends BrowserFactory {
     }
 
     public String getScreenshot() {
-        File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        String path = System.getProperty("user.dir") + "/screenshots/" + System.currentTimeMillis() + ".png";
-        logger.info("Captured Screenshot of Failed Sceanrio,Navigate to following path. : " + System.getProperty("user.dir") + "/screenshots/");
+        String path = System.getProperty("user.dir") + "/screenshots/" + "screenshot_" + System.currentTimeMillis() + ".png";
         try {
+            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            logger.info("Captured Screenshot of Failed scenario," +
+                    "Navigate to following path. : " + System.getProperty("user.dir") + "/screenshots/");
             File destination = new File(path);
             FileUtils.copyFile(src, destination);
         } catch (IOException e) {
@@ -183,28 +219,58 @@ public class BaseClass extends BrowserFactory {
         return path;
     }
 
-    public String savePageSnapshot(String sImagePath) {
-        try {
 
-            TakesScreenshot oCamera;
-            File oTmpFile, oImageFile;
-            oImageFile = new File(sImagePath);
+    public static String getScenarioName(String scenarioName) {
+        return scenarioName.replaceAll("\\s+", "");
+    }
 
-            if (new File(sImagePath).exists()) {
-                throw new Exception("Image File already Exists");
+    public static String getFeatureName(String scenarioID) {
+        String[] featureFolders = scenarioID.split(";");
+        return featureFolders[0].replaceAll("-", "_");
+    }
+
+    public static String getStepName(String actualStepName) {
+        return actualStepName.replace(' ', '_').replaceAll("\\s+", "_");
+    }
+
+    public String getCurrentDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy hh.mm.ss.sss");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
+    public void dateSelector(String exactDate, List<WebElement> dateToSelect) {
+        String date = (exactDate.split("/"))[0];
+        for (WebElement wb : dateToSelect) {
+            if (wb.getText().equals(date)) {
+                wb.click();
+                break;
+            } else {
+                continue;
             }
+        }
+    }
 
-            oCamera = (TakesScreenshot) driver;
-            oTmpFile = oCamera.getScreenshotAs(OutputType.FILE);
-            oCamera.getScreenshotAs(OutputType.FILE);
-
-            FileUtils.copyFile(oTmpFile, oImageFile);
-
-            return "File got saved";
-
+    public void keyboardAction(CharSequence key, int keycode) {
+        Actions action;
+        Robot robot;
+        try {
+            //This block is handling Chrome as Action is not implemented in Geckodriver 0.13
+            action = new Actions(driver);
+            action.sendKeys(key).build().perform();
+            action.release().perform();
+            logger.info("Clicked on " + key + "key from chrome");
         } catch (Exception e) {
-            logger.error("Exception Occurred :" + e.getMessage());
-            return "File already exists";
+            //This block is for firefox, cannot work in headless mode
+            try {
+                robot = new Robot();
+                robot.keyPress(keycode);
+                robot.keyRelease(keycode);
+                logger.info("Clicked on " + keycode + "key from firefox");
+            } catch (AWTException E) {
+                // TODO Auto-generated catch block
+                logger.info(" Failed to perform action : " + e.getMessage());
+            }
         }
     }
 }

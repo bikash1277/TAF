@@ -1,11 +1,15 @@
-package Base;
+package base;
 
 import common.CommonClass;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class WaitClass extends CommonClass {
     WebDriverWait wait;
@@ -44,7 +48,7 @@ public class WaitClass extends CommonClass {
         }
     }
 
-    public static void sleepForTime(int waitTime, String timeUnit) {
+    public void sleepForTime(int waitTime, String timeUnit) {
         try {
             logger.info("Waiting for " + waitTime + " " + timeUnit + " !!!!");
             int time = 0;
@@ -77,5 +81,21 @@ public class WaitClass extends CommonClass {
 
     public void setElementDetectionTimeOut(int lngElementDetectionTimeOut) {
         this.lngElementDetectionTimeOut = lngElementDetectionTimeOut;
+    }
+
+    public void fluentWaitForElementToVisible(WebElement element, int timeInSec, int pollingInterval) {
+        FluentWait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                .withTimeout(Duration.ofSeconds(timeInSec))
+                .pollingEvery(Duration.ofSeconds(pollingInterval))
+                .ignoring(NoSuchElementException.class);
+        wait.until(ExpectedConditions.visibilityOf(element));
+    }
+
+    public void fluentWaitForElementToClickable(WebElement element, int timeInSec, int pollingInterval) {
+        FluentWait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                .withTimeout(Duration.ofSeconds(timeInSec))
+                .pollingEvery(Duration.ofSeconds(pollingInterval))
+                .ignoring(NoSuchElementException.class);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 }

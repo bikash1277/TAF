@@ -77,7 +77,7 @@ public class ExcelFileUtil extends CommonClass {
         }
     }
 
-    public static Object[][] getTestData(String sheetName) {
+    public Object[][] getTestData(String sheetName) {
         FileInputStream file = null;
         try {
             file = new FileInputStream(TESTDATA_SHEET_PATH);

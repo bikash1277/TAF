@@ -1,9 +1,11 @@
 package listeners;
 
-import Base.BaseClass;
+import base.BaseClass;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -36,14 +39,13 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
             }
         }
 
-	/*	ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(OUTPUT_FOLDER + FILE_NAME);
-		htmlReporter.config().setDocumentTitle("Automation Test Results");
-		htmlReporter.config().setReportName("Automation Test Results");
-		htmlReporter.config().setTheme(Theme.STANDARD);
-
-		extent = new ExtentReports();
-		extent.attachReporter(htmlReporter);
-		extent.setReportUsesManualConfiguration(true);*/
+        ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(OUTPUT_FOLDER + FILE_NAME);
+        htmlReporter.config().setDocumentTitle("Automation Test Results");
+        htmlReporter.config().setReportName("Automation Test Results");
+        htmlReporter.config().setTheme(Theme.STANDARD);
+        extent = new ExtentReports();
+        extent.attachReporter(htmlReporter);
+        extent.setReportUsesManualConfiguration(true);
 
         return extent;
     }
@@ -87,22 +89,27 @@ public class ExtentReportListener extends BaseClass implements ITestListener {
 
     public synchronized void onTestFailure(ITestResult result) {
         logger.info((result.getMethod().getMethodName() + " failed!"));
-        test.get().fail(result.getThrowable(),
-                MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
-        test.get().getModel().setEndTime(getTime(result.getEndMillis()));
+        try {
+            test.get().fail(result.getThrowable(),
+                    MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
+            test.get().getModel().setEndTime(getTime(result.getEndMillis()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
     public synchronized void onTestSkipped(ITestResult result) {
-		/*logger.info((result.getMethod().getMethodName() + " skipped!"));
-		try {
-			test.get().skip(result.getThrowable(),
-					MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
-		} catch (IOException e) {
-			System.err
-					.println("Exception thrown while updating test skip status " + Arrays.toString(e.getStackTrace()));
-		}
-		test.get().getModel().setEndTime(getTime(result.getEndMillis()));*/
+        logger.info((result.getMethod().getMethodName() + " skipped!"));
+        try {
+            test.get().skip(result.getThrowable(),
+                    MediaEntityBuilder.createScreenCaptureFromPath(getScreenshot()).build());
+        } catch (IOException e) {
+            System.err
+                    .println("Exception thrown while updating test skip status " + Arrays.toString(e.getStackTrace()));
+        }
+        test.get().getModel().setEndTime(getTime(result.getEndMillis()));
     }
 
     @Override
